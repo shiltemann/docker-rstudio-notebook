@@ -5,10 +5,11 @@ MAINTAINER Eric Rasche <rasche.eric@yandex.ru>
 ENV DEBIAN_FRONTEND noninteractive
 
 # Ensure cran is available
-RUN (echo "deb http://cran.mtu.edu/bin/linux/debian squeeze-cran/" >> /etc/apt/sources.list && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9) && \
-    (echo "deb-src http://http.debian.net/debian squeeze main" >> /etc/apt/sources.list && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9)
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9 && \
+    echo "deb http://cran.mtu.edu/bin/linux/debian squeeze-cran/" >> /etc/apt/sources.list && \
+    echo "deb-src http://http.debian.net/debian squeeze main" >> /etc/apt/sources.list
 
-RUN apt-get -qq update --fix-missing && apt-get install --no-install-recommends -y apt-transport-https \
+RUN apt-get -qq update --fix-missing && apt-get install --no-install-recommends -y --force-yes apt-transport-https \
     r-base r-base-dev wget psmisc libssl0.9.8 sudo libcurl4-openssl-dev curl libxml2-dev \
     net-tools nginx dpkg python python-pip && \
     pip install distribute --upgrade && \
