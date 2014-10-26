@@ -1,8 +1,5 @@
 #!/bin/bash
 
-/etc/init.d/cron start
-# Make sure time for /import/ to be mounted
-sleep 3
 CONF_FILE="/import/conf.yaml"
 # Add the user
 
