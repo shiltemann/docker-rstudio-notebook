@@ -2,31 +2,26 @@ FROM debian:squeeze
 # Must use older version for libssl0.9.8
 MAINTAINER Eric Rasche <rasche.eric@yandex.ru>
 
-# Install all requirements and clean up afterwards
-RUN DEBIAN_FRONTEND=noninteractive apt-get update --fix-missing
+ENV DEBIAN_FRONTEND noninteractive
 
 # Ensure cran is available
-RUN (echo "deb http://cran.mtu.edu/bin/linux/debian squeeze-cran/" >> /etc/apt/sources.list && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9)
-RUN (echo "deb-src http://http.debian.net/debian squeeze main" >> /etc/apt/sources.list && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9)
+RUN (echo "deb http://cran.mtu.edu/bin/linux/debian squeeze-cran/" >> /etc/apt/sources.list && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9) && \
+    (echo "deb-src http://http.debian.net/debian squeeze main" >> /etc/apt/sources.list && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9)
 
-# Install packages
-RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q r-base r-base-dev
-RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q dpkg wget psmisc libssl0.9.8 cron sudo libcurl4-openssl-dev curl libxml2-dev nginx python
-RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q python-pip
-RUN wget http://download2.rstudio.org/rstudio-server-0.98.987-amd64.deb
-RUN dpkg -i rstudio-server-0.98.987-amd64.deb
-RUN rm /rstudio-server-0.98.987-amd64.deb
-RUN pip install bioblend
+RUN apt-get -qq update --fix-missing && apt-get install --no-install-recommends -y apt-transport-https \
+    r-base r-base-dev wget psmisc libssl0.9.8 sudo libcurl4-openssl-dev curl libxml2-dev \
+    net-tools nginx dpkg cron python python-pip && \
+    pip install distribute --upgrade && \
+    pip install bioblend && \
+    apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q net-tools
-RUN DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Install Rstudio
+RUN wget http://download2.rstudio.org/rstudio-server-0.98.987-amd64.deb && dpkg -i rstudio-server-0.98.987-amd64.deb && rm /rstudio-server-0.98.987-amd64.deb
 
 COPY ./GalaxyConnector.tar.gz /tmp/GalaxyConnector.tar.gz
 # Install packages
 COPY ./packages.R /tmp/packages.R
-RUN Rscript /tmp/packages.R
-RUN rm /tmp/packages.R
+RUN Rscript /tmp/packages.R && rm /tmp/packages.R
 
 # Suicide
 COPY ./monitor_traffic.sh /monitor_traffic.sh
