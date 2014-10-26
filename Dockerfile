@@ -10,7 +10,7 @@ RUN (echo "deb http://cran.mtu.edu/bin/linux/debian squeeze-cran/" >> /etc/apt/s
 
 RUN apt-get -qq update --fix-missing && apt-get install --no-install-recommends -y apt-transport-https \
     r-base r-base-dev wget psmisc libssl0.9.8 sudo libcurl4-openssl-dev curl libxml2-dev \
-    net-tools nginx dpkg cron python python-pip && \
+    net-tools nginx dpkg python python-pip && \
     pip install distribute --upgrade && \
     pip install bioblend && \
     apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -24,9 +24,8 @@ COPY ./packages.R /tmp/packages.R
 RUN Rscript /tmp/packages.R && rm /tmp/packages.R
 
 # Suicide
-COPY ./monitor_traffic.sh /monitor_traffic.sh
+ADD ./monitor_traffic.sh /monitor_traffic.sh
 RUN chmod +x /monitor_traffic.sh
-RUN echo "* *     * * *   root    /monitor_traffic.sh" >> /etc/crontab
 
 # /import will be the universal mount-point for IPython
 # The Galaxy instance can copy in data that needs to be present to the IPython webserver
