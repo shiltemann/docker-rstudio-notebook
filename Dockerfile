@@ -20,7 +20,7 @@ RUN wget http://download2.rstudio.org/rstudio-server-0.98.987-amd64.deb && dpkg 
 
 COPY ./GalaxyConnector.tar.gz /tmp/GalaxyConnector.tar.gz
 # Install packages
-COPY ./packages.R /tmp/packages.R
+ADD ./packages.R /tmp/packages.R
 RUN Rscript /tmp/packages.R && rm /tmp/packages.R
 
 # Suicide
@@ -33,12 +33,12 @@ RUN mkdir /import
 VOLUME ["/import/"]
 WORKDIR /import/
 
-COPY ./startup.sh /startup.sh
+ADD ./startup.sh /startup.sh
 RUN chmod +x /startup.sh
-COPY ./proxy.conf /proxy.conf
-COPY ./galaxy.py /usr/local/bin/galaxy.py
+ADD ./proxy.conf /proxy.conf
+ADD ./galaxy.py /usr/local/bin/galaxy.py
 RUN chmod +x /usr/local/bin/galaxy.py
-COPY ./Rprofile.site /usr/lib/R/etc/Rprofile.site
+ADD ./Rprofile.site /usr/lib/R/etc/Rprofile.site
 
 # Start IPython Notebook
 CMD /startup.sh
