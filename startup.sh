@@ -17,11 +17,13 @@ DOCKER_PORT=$(grep 'docker_port' ${CONF_FILE} | sed 's/docker_port: //g')
 # Req latest conf.yaml spec
 CORS_ORIGIN=$(grep 'cors_origin' ${CONF_FILE} | sed 's/cors_origin: //g')
 
-sed -i "s| '\*'; # IE_CORS_ORIGIN| '${CORS_ORIGIN}';|" /proxy.conf;
+sed -i "s|IE_CORS_ORIGIN|${CORS_ORIGIN}|" /proxy.conf;
 sed -i "s/IE_PORT/${DOCKER_PORT}/" /proxy.conf;
+
 cp /proxy.conf /etc/nginx/sites-enabled/default
 # Create user
 useradd -p `openssl passwd -1 $PASSWORD` $USERNAME -d /import/
+echo "Added user $USERNAME:$PASSWORD"
 # Chown import as that user so they can write there
 chown $USERNAME:$USERNAME /import/ -R
 # Start the servers
@@ -32,4 +34,5 @@ echo 'library("yaml")
 library("GalaxyConnector")' > /import/.Rprofile
 
 chmod 777 /import/ -R
-tail -f /var/log/nginx/*
+tail -f /var/log/nginx/* /var/log/dmesg
+#tcpdump -nl -s 0 -i lo -A port 8787  | strings
